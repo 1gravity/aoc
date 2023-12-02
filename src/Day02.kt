@@ -1,11 +1,11 @@
 fun main() {
     fun Regex.getNr(input: String) = find(input)?.groupValues?.get(1)?.toInt() ?: 0
-    val regexGame = "Game (\\d+):".toRegex()
     val regexRed = "(\\d+) red".toRegex()
     val regexGreen = "(\\d+) green".toRegex()
     val regexBlue = "(\\d+) blue".toRegex()
 
     fun part1(input: List<String>): Int {
+        val regexGame = "Game (\\d+):".toRegex()
         val maxCubes = arrayOf(12, 13, 14)
         return input.sumOf { line ->
             val gameNr = regexGame.getNr(line)
@@ -18,11 +18,20 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        return input.sumOf { line ->
+            val chunks = line.split(";")
+            val maxRed = chunks.maxOf { regexRed.getNr(it) }
+            val maxGreen = chunks.maxOf { regexGreen.getNr(it) }
+            val maxBlue = chunks.maxOf { regexBlue.getNr(it) }
+            maxRed * maxGreen * maxBlue
+        }
     }
 
-    val testInput = readInput("input/Day02_test")
-    check(part1(testInput) == 8)
+    val testInput1 = readInput("input/Day02_test_part1")
+    check(part1(testInput1) == 8) { "was ${part1(testInput1)}" }
+
+    val testInput2 = readInput("input/Day02_test_part2")
+    check(part2(testInput1) == 2286) { "was ${part2(testInput2)}" }
 
     val input = readInput("input/Day02")
     part1(input).println()
