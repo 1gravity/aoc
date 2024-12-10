@@ -1,65 +1,109 @@
+import java.util.BitSet
+
+data class Pos(var x: Int, var y: Int)
+
+fun moveUp(pos: Pos, array: Array<Array<Char>>, visited: Array<BitSet>) {
+    if (pos.y == 0) return
+    if (array[pos.x][pos.y - 1] == '#') {
+        moveRight(pos, array, visited)
+    } else {
+        pos.y--
+        visited[pos.x][pos.y] = true
+        moveUp(pos, array, visited)
+    }
+}
+
+fun moveDown(pos: Pos, array: Array<Array<Char>>, visited: Array<BitSet>) {
+    if (pos.y == array[0].size - 1) return
+    if (array[pos.x][pos.y + 1] == '#') {
+        moveLeft(pos, array, visited)
+    } else {
+        pos.y++
+        visited[pos.x][pos.y] = true
+        moveDown(pos, array, visited)
+    }
+}
+
+fun moveLeft(pos: Pos, array: Array<Array<Char>>, visited: Array<BitSet>) {
+    if (pos.x == 0) return
+    if (array[pos.x - 1][pos.y] == '#') {
+        moveUp(pos, array, visited)
+    } else {
+        pos.x--
+        visited[pos.x][pos.y] = true
+        moveLeft(pos, array, visited)
+    }
+}
+
+fun moveRight(pos: Pos, array: Array<Array<Char>>, visited: Array<BitSet>) {
+    if (pos.x == array.size - 1) return
+    if (array[pos.x + 1][pos.y] == '#') {
+        moveDown(pos, array, visited)
+    } else {
+        pos.x++
+        visited[pos.x][pos.y] = true
+        moveRight(pos, array, visited)
+    }
+}
+
+data class InitData(val array: Array<Array<Char>>, val visited: Array<BitSet>, val guard: Pos)
+
 fun main() {
-    val timeRegex = "Time:\\s+(.+)$".toRegex()
-    val distanceRegex = "Distance:\\s+(.+)$".toRegex()
-
-    fun part1(input: List<String>): Int {
-        fun String.readNumbers(regex: Regex) = regex.find(this)
-            ?.groupValues
-            ?.get(1)
-            ?.split(" ")
-            ?.filter { it.isNotBlank() }
-            ?.map { it.trim().toInt() }
-
-        val times = input[0].readNumbers(timeRegex)
-        val distances = input[1].readNumbers(distanceRegex)
-
-        var result = 1
-
-        times?.forEachIndexed { index, time ->
-            val distance = distances?.get(index) ?: 0
-            var sum = 0
-            for (i in 1..<time) {
-                val nrOfMoves = time - i
-                val moveDistance = (time - nrOfMoves) * nrOfMoves
-                if (moveDistance > distance) {
-                    sum++
-                }
-            }
-            result *= sum
+    fun prepareInput(input: List<String>): InitData {
+        val array = Array<Array<Char>>(input.size) {
+            Array<Char>(input[0].length) { ' ' }
         }
 
-        return result
+        val visited = Array<BitSet>(input.size) {
+            BitSet()
+        }
+
+        val guard = Pos(0, 0)
+        input.forEachIndexed { y, line -> line.forEachIndexed { x, char ->
+            if (char == '^') {
+                guard.x = x
+                guard.y = y
+            }
+            array[x][y] = char
+        } }
+
+        visited[guard.x][guard.y] = true
+
+        return InitData(array, visited, guard)
+    }
+
+    fun part1(input: List<String>): Int {
+        val (array, visited, guard) = prepareInput(input)
+        moveUp(guard, array, visited)
+        return visited.sumOf { it.cardinality() }
     }
 
     fun part2(input: List<String>): Int {
-        fun String.readNumbers(regex: Regex) = regex.find(this)
-            ?.groupValues
-            ?.get(1)
-            ?.replace(" ", "")
-            ?.toLong()
-
-        val time = input[0].readNumbers(timeRegex)!!
-        val distance = input[1].readNumbers(distanceRegex)!!
-
-        var sum = 0
-
-        for (i in 1L..<time) {
-            val nrOfMoves = time - i
-            val moveDistance = (time - nrOfMoves) * nrOfMoves
-            if (moveDistance > distance) {
-                sum++
+        val (array, visited, guard) = prepareInput(input)
+        var count = 0
+        array.forEachIndexed { x, col ->
+            col.forEachIndexed { y, char ->
+                if (char == '.') {
+                    array[x][y] = '#'
+                    runCatching {
+                        visited.forEach { it.clear() }
+                        moveUp(guard.copy(), array, visited)
+                    }.onFailure { count++ }
+                    array[x][y] = '.'
+                }
             }
         }
-
-        return sum
+        return count
     }
 
     val day = "06"
-    val testInput = readInput("input/Day${day}_test")
-    check(part1(testInput) == 288) { "was ${part1(testInput)}" }
-    check(part2(testInput) == 71503) { "was ${part2(testInput)}" }
-
+    val testInput1 = readInput("input/Day${day}_test")
+    val testInput2 = readInput("input/Day${day}_test")
     val input = readInput("input/Day${day}")
+
+    check(part1(testInput1) == 41) { "was ${part1(testInput1)}" }
     part1(input).println()
+
+    check(part2(testInput2) == 6) { "was ${part2(testInput2)}" }
     part2(input).println()
 }

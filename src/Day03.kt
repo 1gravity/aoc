@@ -1,83 +1,45 @@
 fun main() {
-    val adjacent = arrayOf(
-        Pair(-1, -1), Pair(0, -1), Pair(1, -1),
-        Pair(-1, 0), Pair(1, 0),
-        Pair(-1, 1), Pair(0, 1), Pair(1, 1)
-    )
-
-    val regexNumber = "(\\d+)".toRegex()
-
     fun part1(input: List<String>): Int {
-        fun isSymbol(x: Int, y: Int) = input[y][x].isDigit().not() && input[y][x] != '.'
-
-        fun isPart(x: Int, y: Int): Boolean {
-            return adjacent.any { (dx, dy) ->
-                val nx = x + dx
-                val ny = y + dy
-                nx >= 0 && nx < input[y].length && ny >= 0 && ny < input.size && isSymbol(nx, ny)
+        val regex = "mul\\((\\d+),(\\d+)\\)".toRegex()
+        return input.sumOf { line ->
+            regex.findAll(line).sumOf { result ->
+                result.groupValues[1].toInt() * result.groupValues[2].toInt()
             }
         }
-
-        var sum = 0
-        input.forEachIndexed { y, line ->
-            regexNumber.findAll(line).forEach { matchResult ->
-                val number = matchResult.groupValues[1].toInt()
-                val hasSymbol = matchResult.range.any { x ->
-                    isPart(x, y)
-                }
-                if (hasSymbol) sum += number
-            }
-        }
-        return sum
     }
 
     fun part2(input: List<String>): Int {
-        fun isSymbol(x: Int, y: Int) = input[y][x] == '*'
+        fun Regex.getAll(line: String): List<Int> = findAll(line).map { result ->
+            result.groups[1]?.range?.first ?: -1
+        }.toList()
+        fun List<Int>.getHighest(pos: Int) = filter { it < pos }.maxOrNull() ?: -1
 
-        val gears = Array(input.size) {
-            Array(input[0].length) {
-                ArrayList<Int>()
-            }
-        }
-
-        input.forEachIndexed { y, line ->
-            regexNumber.findAll(line).forEach { matchResult ->
-                val number = matchResult.groupValues[1].toInt()
-                val gearsFound = HashMap<String, Int>()
-                matchResult.range.forEach { x ->
-                    adjacent.forEach { (dx, dy) ->
-                        val nx = x + dx
-                        val ny = y + dy
-                        if (nx >= 0 && nx < input[y].length && ny >= 0 && ny < input.size && isSymbol(nx, ny)) {
-                            if (gearsFound["$nx$ny"] != number) {
-                                gearsFound["$nx$ny"] = number
-                                gears[ny][nx].add(number)
-                            }
-                        }
-                    }
+        val regex = "mul\\((\\d+),(\\d+)\\)".toRegex()
+        val dos = "(do\\(\\))".toRegex()
+        val donts = "(don't\\(\\))".toRegex()
+        return input.sumOf { line ->
+            val doList = dos.getAll(line)
+            val dontList = donts.getAll(line)
+            regex.findAll(line).sumOf { result ->
+                val start = result.groups[1]?.range?.first ?: 0
+                val doHighest = doList.getHighest(start)
+                val dontHighest = dontList.getHighest(start)
+                if (doHighest > dontHighest || dontHighest == -1) {
+                    result.groupValues[1].toInt() * result.groupValues[2].toInt()
+                } else {
+                    0
                 }
             }
         }
-
-        var sum = 0
-        for (y in input.indices) {
-            for (x in 0 until input[0].length) {
-                if (gears[y][x].size == 2) {
-                    sum += gears[y][x][0] * gears[y][x][1]
-                }
-            }
-        }
-        return sum
     }
 
     val day = "03"
-    val testInput1 = readInput("input/Day${day}_test_part1")
-    check(part1(testInput1) == 4361) { "was ${part1(testInput1)}" }
-
-    val testInput2 = readInput("input/Day${day}_test_part2")
-    check(part2(testInput1) == 467835) { "was ${part2(testInput2)}" }
-
     val input = readInput("input/Day${day}")
+    val testInput1 = readInput("input/Day${day}_test_part1")
+    val testInput2 = readInput("input/Day${day}_test_part2")
+
+    check(part1(testInput1) == 161) { "was ${part1(testInput1)}" }
     part1(input).println()
+    check(part2(testInput2) == 48) { "was ${part2(testInput2)}" }
     part2(input).println()
 }
