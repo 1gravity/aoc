@@ -36,7 +36,6 @@ fun traverse(positions: Array<MutableList<Pos>>, nr: Int, pos: Pos, visited: Mut
             it.x == nextPos.x && it.y == nextPos.y
         }
     }
-    if (validNeighbors.isEmpty()) return 0
     return validNeighbors.sumOf { neighbor ->
         traverse(positions, nr + 1, neighbor, visited, allowDuplicates)
     }
@@ -64,9 +63,9 @@ fun main() {
 
     val resultPart1 = part1(testInput)
     check(resultPart1 == 36L) { "was $resultPart1" }
-    part1(input).println()
+    part1(input).println()  // 624
 
     val resultPart2 = part2(testInput)
     check(resultPart2 == 81L) { "was $resultPart2" }
-    part2(input).println()
+    part2(input).println()  // 1483
 }
