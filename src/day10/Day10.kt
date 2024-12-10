@@ -42,20 +42,20 @@ fun traverse(positions: Array<MutableList<Pos>>, nr: Int, pos: Pos, visited: Mut
     }
 }
 
-fun part1(input: List<String>): Long {
+fun solve(input: List<String>, allowDuplicates: Boolean): Long {
     val positions = getPositions(input)
     return positions[0].sumOf {
-        val sum = traverse(positions, 0, it, mutableListOf(), false)
+        val sum = traverse(positions, 0, it, mutableListOf(), allowDuplicates)
         sum
     }
 }
 
+fun part1(input: List<String>): Long {
+    return solve(input, false)
+}
+
 fun part2(input: List<String>): Long {
-    val positions = getPositions(input)
-    return positions[0].sumOf {
-        val sum = traverse(positions, 0, it, mutableListOf(), true)
-        sum
-    }
+    return solve(input, true)
 }
 
 fun main() {
