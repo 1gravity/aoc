@@ -104,7 +104,6 @@ fun part2(input: List<String>): Long {
         }
         val cornerCases = region.countCornerCases()
         val sides = cornerCases.times(2) + verticalEdges.sumOf(::countEdges) + horizontalEdges.sumOf(::countEdges)
-
         region.size * sides
     }
 }
