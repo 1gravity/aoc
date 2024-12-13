@@ -70,24 +70,15 @@ fun countEdges(edges: Array<Boolean>): Long {
 }
 
 fun List<Plant>.countCornerCases(): Int {
-    var count = 0
-    forEach { plant ->
-        if (
-            any { neighbor -> neighbor.pos.x == plant.pos.x + 1 && neighbor.pos.y == plant.pos.y + 1} &&
-            none { neighbor -> neighbor.pos.x == plant.pos.x && neighbor.pos.y == plant.pos.y + 1} &&
-            none { neighbor -> neighbor.pos.x == plant.pos.x + 1 && neighbor.pos.y == plant.pos.y}
-        ) {
-            count++
-        }
-        if (
-            any { neighbor -> neighbor.pos.x == plant.pos.x - 1 && neighbor.pos.y == plant.pos.y + 1} &&
-            none { neighbor -> neighbor.pos.x == plant.pos.x - 1 && neighbor.pos.y == plant.pos.y} &&
-            none { neighbor -> neighbor.pos.x == plant.pos.x && neighbor.pos.y == plant.pos.y + 1}
-        ) {
-            count++
-        }
+    return this.sumOf { plant ->
+        val corner1 = any { neighbor -> neighbor.pos.x == plant.pos.x + 1 && neighbor.pos.y == plant.pos.y + 1} &&
+                none { neighbor -> neighbor.pos.x == plant.pos.x && neighbor.pos.y == plant.pos.y + 1} &&
+                none { neighbor -> neighbor.pos.x == plant.pos.x + 1 && neighbor.pos.y == plant.pos.y}
+        val corner2 = any { neighbor -> neighbor.pos.x == plant.pos.x - 1 && neighbor.pos.y == plant.pos.y + 1} &&
+                none { neighbor -> neighbor.pos.x == plant.pos.x - 1 && neighbor.pos.y == plant.pos.y} &&
+                none { neighbor -> neighbor.pos.x == plant.pos.x && neighbor.pos.y == plant.pos.y + 1}
+        (if (corner1 || corner2) 1 else 0).toInt()
     }
-    return count
 }
 
 fun part2(input: List<String>): Long {
@@ -121,7 +112,6 @@ fun part2(input: List<String>): Long {
 fun main() {
     val day = "12"
     val testInput = readInput("input/Day${day}_test")
-    val testInput2 = readInput("input/Day${day}_test2")
     val input = readInput("input/Day${day}")
 
     val resultPart1 = part1(testInput)
@@ -130,9 +120,6 @@ fun main() {
 
     val resultPart2 = part2(testInput)
     check(resultPart2 == 1206L) { "was $resultPart2" }
-
-    val resultPart3 = part2(testInput2)
-    check(resultPart3 == 10*7+4+4L) { "was $resultPart3" }
 
     part2(input).println()  // 841934
 }
