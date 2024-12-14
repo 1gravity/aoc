@@ -2,7 +2,6 @@ package day14
 
 import println
 import readInput
-import kotlin.collections.forEach
 import kotlin.math.max
 
 data class Pos(var x: Int, var y: Int)
@@ -80,6 +79,7 @@ fun part2(input: List<String>, width: Int, height: Int): Int {
             }
         }
     }
+    println("Nr of trees: ${trees.size}")
     return trees.first()
 }
 
