@@ -171,5 +171,5 @@ fun main() {
 
     val resultPart2 = solve(testInput)
     check(resultPart2 == 9021L) { "was $resultPart2" }
-    solve(input).println()
+    solve(input).println()  // 1462788
 }
